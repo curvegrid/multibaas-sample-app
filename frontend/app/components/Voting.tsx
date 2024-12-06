@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
 import {
   useAccount,
   useSendTransaction,
@@ -9,6 +8,7 @@ import {
 } from "wagmi";
 import useMultiBaas from "../hooks/useMultiBaas";
 import VoteButton from "./VoteButton";
+import ProgressBar from "./ProgressBar"
 
 interface VotingProps {
   setTxReceipt: (receipt: UseWaitForTransactionReceiptReturnType['data']) => void;
@@ -17,12 +17,13 @@ interface VotingProps {
 const Voting: React.FC<VotingProps> = ({ setTxReceipt }) => {
   const { getVotes, castVote, clearVote, hasVoted, getUserVotes } = useMultiBaas();
   const { address, isConnected } = useAccount();
-  const { openConnectModal } = useConnectModal();
   const { sendTransactionAsync } = useSendTransaction();
 
   const [votesCount, setVotesCount] = useState<number[]>([]);
   const [currentVoteIndex, setCurrentVoteIndex] = useState<number | null>(null);
   const [txHash, setTxHash] = useState<`0x${string}`>();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const { data: txReceipt, isLoading: isTxProcessing } =
   useWaitForTransactionReceipt({ hash: txHash });
@@ -34,8 +35,8 @@ const Voting: React.FC<VotingProps> = ({ setTxReceipt }) => {
       if (votesArray) {
         setVotesCount(votesArray.map((vote) => parseInt(vote)));
       }
-    } catch (error) {
-      console.error("Error fetching votes:", error);
+    } catch (e) {
+      console.error("Error fetching votes:", e);
     }
   }, [getVotes]);
 
@@ -54,8 +55,8 @@ const Voting: React.FC<VotingProps> = ({ setTxReceipt }) => {
         } else {
           setCurrentVoteIndex(null);
         }
-      } catch (error) {
-        console.error("Error checking user vote:", error);
+      } catch (e) {
+        console.error("Error checking user vote:", e);
       }
     }
   }, [address, hasVoted, getUserVotes]);
@@ -74,10 +75,7 @@ const Voting: React.FC<VotingProps> = ({ setTxReceipt }) => {
   }, [txReceipt, setTxReceipt]);
 
   const handleVote = async (index: number) => {
-    if (!isConnected) {
-      openConnectModal?.();
-      return;
-    }
+    setLoading(true);
     try {
       const tx =
         currentVoteIndex === index
@@ -85,8 +83,13 @@ const Voting: React.FC<VotingProps> = ({ setTxReceipt }) => {
           : await castVote(index.toString());
       const hash = await sendTransactionAsync(tx);
       setTxHash(hash);
-    } catch (error) {
-      console.error("Error sending transaction:", error);
+    } catch (e) {
+      setError(`Error casting a vote: ${e}`)
+      setTimeout(() => {
+        setError(null)
+      }, 3000)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -114,7 +117,12 @@ const Voting: React.FC<VotingProps> = ({ setTxReceipt }) => {
           )}
         </div>
       )}
+      {loading && (
+        <ProgressBar />
+      )}
+      {error && <div className="text-center font-bold text-red-500">{error}</div>}
     </div>
+  
   );
 };
 

@@ -35,7 +35,7 @@ const Membership: React.FC = () => {
     } catch {
       setLoading(false);
     }
-  }, [joinGroup, identity, secretCode])
+  }, [joinGroup, identity, secretCode, sendTransactionAsync])
 
   const onClickCheckCommitment = useCallback(async () => {
     if(!identity) return;
@@ -47,11 +47,12 @@ const Membership: React.FC = () => {
   useEffect(() => setIsJoined(false),[identity] )
 
   useEffect(() => {
+    console.log('txReceipt', txReceipt)
     if (txReceipt) {
       onClickCheckCommitment();
       setLoading(false);
     }
-  },[txReceipt])
+  },[txReceipt, onClickCheckCommitment])
 
 
   return (

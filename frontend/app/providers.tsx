@@ -1,12 +1,7 @@
 "use client";
 
 import * as React from "react";
-
-import {
-  getDefaultConfig,
-  RainbowKitProvider,
-} from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
+import { http, createConfig, WagmiProvider } from 'wagmi'
 import {
   sepolia
 } from 'wagmi/chains';
@@ -15,13 +10,14 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
-const projectId = process.env.NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID || '';
-
-const config = getDefaultConfig({
-  appName: 'Simple Voting DApp',
-  projectId,
+export const config = createConfig({
   chains: [sepolia],
-});
+  connectors: [],
+  transports: {
+    [sepolia.id]: http(),
+  },
+})
+
 const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -30,9 +26,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          {mounted && children}
-        </RainbowKitProvider>
+        {mounted && children}
       </QueryClientProvider>
     </WagmiProvider>
   );
