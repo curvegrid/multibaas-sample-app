@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Voting from "./components/Voting";
 import Events from "./components/Events";
+import Membership from "./components/Membership";
 
 const Home: React.FC = () => {
   const [txReceipt, setTxReceipt] = useState<UseWaitForTransactionReceiptReturnType['data']>();
@@ -16,6 +17,7 @@ const Home: React.FC = () => {
         <ConnectButton />
       </div>
       <div>
+        <Membership />
         <Voting setTxReceipt={setTxReceipt} />
         <Events txReceipt={txReceipt} />
       </div>

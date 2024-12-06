@@ -1,9 +1,13 @@
 "use client";
+import type { Identity } from "@semaphore-protocol/identity";
 import type { PostMethodArgs, MethodCallResponse, TransactionToSignResponse, Event } from "@curvegrid/multibaas-sdk";
 import type { SendTransactionParameters } from "@wagmi/core";
-import { Configuration, ContractsApi, EventsApi, ChainsApi }from "@curvegrid/multibaas-sdk";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Configuration, ContractsApi, EventsApi, ChainsApi, EventQueriesApi }from "@curvegrid/multibaas-sdk";
+import { generateProof as generateSemaphoreProof } from "@semaphore-protocol/proof"
 import { useAccount } from "wagmi";
-import { useCallback, useMemo } from "react";
+import useSemaphore from "../hooks/useSemaphore";
+import { generateMerkleProof } from "../utils/merkelProof";
 
 interface ChainStatus {
   chainID: number;
@@ -11,6 +15,8 @@ interface ChainStatus {
 }
 
 interface MultiBaasHook {
+  joinGroup: (secretCode: string, identity: Identity) => Promise<SendTransactionParameters>;
+  checkCommitmentInGroup: (identity: Identity) =>  Promise<MethodCallResponse['output']>;
   getChainStatus: () => Promise<ChainStatus | null>;
   clearVote: () => Promise<SendTransactionParameters>;
   getVotes: () => Promise<string[] | null>;
@@ -27,8 +33,14 @@ const useMultiBaas = (): MultiBaasHook => {
     process.env.NEXT_PUBLIC_MULTIBAAS_VOTING_CONTRACT_LABEL || "";
   const votingAddressLabel =
     process.env.NEXT_PUBLIC_MULTIBAAS_VOTING_ADDRESS_LABEL || "";
+  const semaphoreAddress = process.env.NEXT_PUBLIC_MULTIBAAS_SEMAPHORE_ADDRESS || "";
+  const semaphoreContractLabel = 'semaphore';
+  const semaphoreAddressLabel = 'semaphore';
+
 
   const chain = "ethereum";
+
+  const { identity } = useSemaphore();
 
   // Memoize mbConfig
   const mbConfig = useMemo(() => {
@@ -41,7 +53,9 @@ const useMultiBaas = (): MultiBaasHook => {
   // Memoize Api
   const contractsApi = useMemo(() => new ContractsApi(mbConfig), [mbConfig]);
   const eventsApi = useMemo(() => new EventsApi(mbConfig), [mbConfig]);
+  const eventQueriesApi = useMemo(() => new EventQueriesApi(mbConfig), [mbConfig]);
   const chainsApi = useMemo(() => new ChainsApi(mbConfig), [mbConfig]);
+  const [groupId, setGroupId] = useState(localStorage.getItem("groupId"));
 
   const { address, isConnected } = useAccount();
 
@@ -56,7 +70,7 @@ const useMultiBaas = (): MultiBaasHook => {
   };
 
   const callContractFunction = useCallback(
-    async (methodName: string, args: PostMethodArgs['args'] = []): Promise<MethodCallResponse['output'] | TransactionToSignResponse['tx']> => {
+    async (methodName: string, args: PostMethodArgs['args'] = [], useSemaphore=false): Promise<MethodCallResponse['output'] | TransactionToSignResponse['tx']> => {
       const payload: PostMethodArgs = {
         args,
         contractOverride: true,
@@ -65,8 +79,8 @@ const useMultiBaas = (): MultiBaasHook => {
 
       const response = await contractsApi.callContractFunction(
         chain,
-        votingAddressLabel,
-        votingContractLabel,
+        useSemaphore ? semaphoreAddressLabel : votingAddressLabel,
+        useSemaphore ? semaphoreContractLabel : votingContractLabel,
         methodName,
         payload
       );
@@ -82,10 +96,72 @@ const useMultiBaas = (): MultiBaasHook => {
     [contractsApi, chain, votingAddressLabel, votingContractLabel, isConnected, address]
   );
 
+  useEffect(() => {
+    if(!groupId){
+      getGroupId();
+    }
+    async function getGroupId() {
+      const output = await callContractFunction("groupId")
+      setGroupId(output)
+      localStorage.setItem("groupId", output)
+    }
+  }, [])
+
+  // const _getCommitmentsFromMemberAddedEvents = useCallback(async (): Promise<Array<bigint> | null> => {
+  //   try {
+  //     const eventSignature = "MemberAdded(uint256,uint256,uint256,uint256)";
+  //     const response = await eventsApi.listEvents(
+  //       undefined,
+  //       undefined,
+  //       undefined,
+  //       undefined,
+  //       undefined,
+  //       false,
+  //       chain,
+  //       semaphoreAddress,
+  //       undefined,
+  //       eventSignature,
+  //       50
+  //     );
+  //     const events: Event[] = response.data.result
+  //       .filter(event => event.transaction.contract.addressLabel === votingAddressLabel)
+  //     const commitments = events
+  //       .sort((a, b) => new Date(a.triggeredAt).getTime() - new Date(b.triggeredAt).getTime())
+  //       .map(item => item.event.inputs[2].value)
+  //     return commitments;
+  //   } catch (err) {
+  //     console.error("Error getting member added events:", err);
+  //     return null;
+  //   }
+  // }, [eventsApi, chain, votingAddressLabel]);
+
+  const _getCommitmentsFromQuery = useCallback(async (): Promise<Array<bigint> | null> => {
+    const queryLabel = "commitments";
+    try {
+
+      const response = await eventQueriesApi.executeEventQuery(queryLabel, undefined, 50);
+      const commitments = response.data.result.rows.map((row) => row.identitycommitment);
+      return commitments;
+    } catch(e) {
+      console.error("Error getting member added events:", e);
+      return null;
+    }
+  }, [eventQueriesApi, chain, callContractFunction])
+
+  const joinGroup = useCallback(async (secretCode: string, identity: Identity): Promise<SendTransactionParameters>  => {
+    return await callContractFunction("joinGroup", [secretCode, identity!.commitment.toString()]);
+  }, [callContractFunction])
+
+  const checkCommitmentInGroup = useCallback(async (identity: Identity): Promise<MethodCallResponse['output']>  => {
+    if (!groupId) {
+      throw Error("groupId uncertain")
+    }
+    return await callContractFunction("hasMember", [groupId, identity!.commitment.toString()], true);
+  }, [callContractFunction, groupId])
+
   const clearVote = useCallback(async (): Promise<SendTransactionParameters> => {
     return await callContractFunction("clearVote");
   }, [callContractFunction]);
-
 
   const getVotes = useCallback(async (): Promise<string[] | null> => {
     try {
@@ -106,10 +182,38 @@ const useMultiBaas = (): MultiBaasHook => {
       return null;
     }
   }, [callContractFunction]);
-
+  
   const castVote = useCallback(async (choice: string): Promise<SendTransactionParameters> => {
-    return await callContractFunction("vote", [choice]);
-  }, [callContractFunction]);
+    if (!identity) throw Error("No identity")
+    if (!groupId) throw Error("No groupId")
+    const scope = groupId;
+
+    // You have two API to get commitments
+
+    // First choice: Get all events and filter on frontend side
+    // const commitments = await _getCommitmentsFromMemberAddedEvents()
+
+    // Second choice: Get commitments from a event query
+    const commitments = await _getCommitmentsFromQuery()
+
+    if (!commitments?.length) throw Error("No members in this group")
+
+    const index = await callContractFunction("indexOf", [groupId, identity?.commitment.toString()], true)
+    const merkelProof = await generateMerkleProof(commitments, Number(index))
+
+    const proof = await generateSemaphoreProof(identity, merkelProof, choice, scope)
+
+    console.log('generateSemaphoreProof', proof)
+
+    return await callContractFunction("vote", [
+      proof.merkleTreeDepth,
+      proof.merkleTreeRoot,
+      proof.nullifier,
+      proof.message,
+      proof.points,
+    ]);
+
+  }, [callContractFunction, groupId, identity]);
 
   const getUserVotes = useCallback(async (ethAddress: string): Promise<string | null> => {
     try {
@@ -146,7 +250,9 @@ const useMultiBaas = (): MultiBaasHook => {
   }, [eventsApi, chain, votingAddressLabel, votingContractLabel]);
 
   return {
+    joinGroup,
     getChainStatus,
+    checkCommitmentInGroup,
     clearVote,
     getVotes,
     hasVoted,
