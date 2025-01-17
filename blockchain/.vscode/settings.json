@@ -1,0 +1,11 @@
+{
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.validate": ["javascript", "typescript"],
+  "eslint.options": {
+    "overrideConfigFile": "./eslint.config.js"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "prettier.documentSelectors": ["**/*.sol"],
+  "solidity.formatter": "prettier"
+}
