@@ -1,15 +1,13 @@
 import { ethers } from 'hardhat';
 
 async function main() {
-  const numberOfOptions = 2
+  const numberOfOptions = 2;
 
   const simpleVoting = await ethers.deployContract('SimpleVoting', [numberOfOptions]);
 
   await simpleVoting.waitForDeployment();
 
-  console.log(
-    `SimpleVoting with ${numberOfOptions} options deployed to ${simpleVoting.target}`,
-  );
+  console.log(`SimpleVoting with ${numberOfOptions} options deployed to ${await simpleVoting.getAddress()}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
