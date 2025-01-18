@@ -4,7 +4,7 @@
   "description": "MultiBaas Sample Hardhat Project",
   "main": "index.js",
   "scripts": {
-    "prepare": "husky",
+    "prepare": "cd .. && husky blockchain/.husky",
     "fix:eslint": "eslint --fix '{*,**/*}.{js,ts}'",
     "fix:prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
     "fix:solhint": "solhint --fix --noPrompt",

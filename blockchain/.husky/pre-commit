@@ -1,1 +1,3 @@
+# https://typicode.github.io/husky/how-to.html#project-not-in-git-root-directory
+cd blockchain
 npx lint-staged
