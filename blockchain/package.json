@@ -7,7 +7,7 @@
     "prepare": "cd .. && husky blockchain/.husky",
     "fix:eslint": "eslint --fix '{*,**/*}.{js,ts}'",
     "fix:prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
-    "fix:solhint": "solhint --fix --noPrompt",
+    "fix:solhint": "solhint --fix --noPrompt 'contracts/**/*.sol'",
     "fix:all": "npm run fix:eslint && npm run fix:prettier && npm run fix:solhint",
     "test": "npx hardhat test",
     "deploy:voting:dev": "HARDHAT_NETWORK=development npx hardhat run scripts/deploy-mb.ts",
