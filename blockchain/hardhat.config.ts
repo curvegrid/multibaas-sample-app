@@ -18,7 +18,10 @@ if (process.env['HARDHAT_NETWORK']) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
   } = require(CONFIG_FILE));
 } else {
-  throw new Error('HARDHAT_NETWORK not set');
+  // Default values for when running commands like clean or compile
+  ethChainID = 1337;
+  web3Key = undefined;
+  adminApiKey = '';
 }
 
 const web3Url = web3Key ? `${deploymentEndpoint}/web3/${web3Key}` : rpcUrl;
