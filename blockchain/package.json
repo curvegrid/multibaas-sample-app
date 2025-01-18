@@ -29,7 +29,7 @@
     "*.json": "prettier --write",
     "*.sol": [
       "prettier --write --plugin=prettier-plugin-solidity",
-      "solhint --fix"
+      "solhint --fix --noPrompt 'contracts/**/*.sol'"
     ]
   },
   "devDependencies": {
