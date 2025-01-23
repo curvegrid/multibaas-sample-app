@@ -28,8 +28,8 @@
     "*.{js,ts}": "eslint --fix",
     "*.json": "prettier --write",
     "*.sol": [
-      "prettier --write --plugin=prettier-plugin-solidity",
-      "solhint --fix --noPrompt 'contracts/**/*.sol'"
+      "npm run fix:prettier",
+      "npm run fix:solhint"
     ]
   },
   "devDependencies": {
