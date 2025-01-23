@@ -3,12 +3,12 @@ import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-multibaas-plugin';
 import path from 'path';
 
-let deployerPrivateKey = '0x0000000000000000000000000000000000000000000000000000000000000000',
-  deploymentEndpoint = '',
-  ethChainID: number,
-  web3Key,
-  adminApiKey: '',
-  rpcUrl = '';
+let deployerPrivateKey = '';
+let deploymentEndpoint = '';
+let ethChainID = 1337;
+let adminApiKey = '';
+let web3Key = ''; // optional
+let rpcUrl = ''; // optional
 
 if (process.env['HARDHAT_NETWORK']) {
   const CONFIG_FILE = path.join(__dirname, `./deployment-config.${process.env['HARDHAT_NETWORK']}`);
@@ -17,11 +17,6 @@ if (process.env['HARDHAT_NETWORK']) {
     deploymentConfig: { deploymentEndpoint, ethChainID, deployerPrivateKey, web3Key, adminApiKey, rpcUrl },
     // eslint-disable-next-line @typescript-eslint/no-require-imports
   } = require(CONFIG_FILE));
-} else {
-  // Default values for when running commands like clean or compile
-  ethChainID = 1337;
-  web3Key = undefined;
-  adminApiKey = '';
 }
 
 const web3Url = web3Key ? `${deploymentEndpoint}/web3/${web3Key}` : rpcUrl;
