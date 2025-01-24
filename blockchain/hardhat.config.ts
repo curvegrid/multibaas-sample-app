@@ -8,7 +8,7 @@ let deploymentEndpoint = '';
 let ethChainID = 1337;
 let adminApiKey = '';
 let web3Key = '';
-let rpcUrl = ''; // Required if web3Key is not provided or empty
+let rpcUrl = ''; // Required if web3Key is not provided
 
 if (process.env['HARDHAT_NETWORK']) {
   const CONFIG_FILE = path.join(__dirname, `./deployment-config.${process.env['HARDHAT_NETWORK']}`);
@@ -19,7 +19,7 @@ if (process.env['HARDHAT_NETWORK']) {
   } = require(CONFIG_FILE));
 }
 
-const web3Url = web3Key && web3Key !== '' ? `${deploymentEndpoint}/web3/${web3Key}` : rpcUrl;
+const web3Url = web3Key ? `${deploymentEndpoint}/web3/${web3Key}` : rpcUrl;
 
 const config: HardhatUserConfig = {
   networks: {
