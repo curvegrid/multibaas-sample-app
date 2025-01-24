@@ -8,7 +8,7 @@ let deploymentEndpoint = '';
 let ethChainID = 1337;
 let adminApiKey = '';
 let web3Key = '';
-let rpcUrl = ''; // must be defined in the deployment config if the web3Key is not defined
+let rpcUrl = ''; // Required if web3Key is not provided or empty
 
 if (process.env['HARDHAT_NETWORK']) {
   const CONFIG_FILE = path.join(__dirname, `./deployment-config.${process.env['HARDHAT_NETWORK']}`);
