@@ -8,7 +8,8 @@
     "fix:eslint": "eslint --fix '{*,**/*}.{js,ts}'",
     "fix:prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
     "fix:solhint": "solhint --fix --noPrompt 'contracts/**/*.sol'",
-    "fix:all": "npm run fix:eslint && npm run fix:prettier && npm run fix:solhint",
+    "fix:sol": "npm run fix:prettier && npm run fix:solhint",
+    "fix:all": "npm run fix:eslint && npm run fix:sol",
     "test": "npx hardhat test",
     "deploy:voting:dev": "HARDHAT_NETWORK=development npx hardhat run scripts/deploy-mb.ts",
     "deploy:voting:testing": "HARDHAT_NETWORK=testing npx hardhat run scripts/deploy-mb.ts"
@@ -27,10 +28,7 @@
   "lint-staged": {
     "*.{js,ts}": "eslint --fix",
     "*.json": "prettier --write",
-    "*.sol": [
-      "prettier --write --plugin=prettier-plugin-solidity",
-      "solhint --fix --noPrompt 'contracts/**/*.sol'"
-    ]
+    "*.sol": "npm run fix:sol"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
