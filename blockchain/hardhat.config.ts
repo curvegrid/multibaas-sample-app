@@ -3,7 +3,7 @@ import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-multibaas-plugin';
 import path from 'path';
 
-let deployerPrivateKey = '';
+let deployerPrivateKey = '0x0000000000000000000000000000000000000000000000000000000000000000';
 let deploymentEndpoint = '';
 let ethChainID = 1337;
 let adminApiKey = '';
