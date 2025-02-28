@@ -33,6 +33,11 @@ Please make sure not to mix up these API keys.
 
 Now, navigate to the `Admin > CORS Origins` page and add `http://localhost:3000` to the list of allowed origins. By default, MultiBaas does not allow unknown remote clients to make API requests, so by adding the URL above, you are giving permission to your local Next.js app to query MultiBaas.
 
+## Install Dependencies
+```sh
+npm install
+```
+
 ## Contract Deployment via Hardhat
 
 If you have not yet deployed the `SimpleVoting.sol` smart contract to your MultiBaas deployment, we will now do so using the Hardhat project.
@@ -41,7 +46,6 @@ Prepare the project for deployment:
 
 ```sh
 cd blockchain
-npm install
 cp deployment-config.template.js deployment-config.development.js
 ```
 
@@ -69,7 +73,6 @@ Start by setting up the project.
 
 ```sh
 cd frontend
-npm install
 cp .env.template .env.development
 ```
 
