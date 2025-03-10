@@ -1,6 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
+const { Wallet } = require('ethers');
 
 const configFiles = [
   {
@@ -80,6 +81,39 @@ async function createAPIKey(deploymentURL, apiKey, label, groupID) {
 
 }
 
+async function callFaucet(deploymentURL, apiKey, publicKey) {
+  const apiEndpoint = `${deploymentURL}/api/v0/faucet`;
+  const requestBody = {
+    address: publicKey
+  };
+
+  try {
+
+    const request = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    };
+
+    const response = await fetch(apiEndpoint, request);
+
+    if (!response.ok) {
+      throw new Error(`❌ API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
+    }
+
+    const data = await response.json();
+    console.log('data', data);
+    return {}
+  } catch (error) {
+    console.error(`❌ API Request Error: ${error.message}`);
+  }
+
+  return {}
+}
+
 async function promptForDeploymentInfo() {
 
   // Prompt for config only if files exist
@@ -142,13 +176,29 @@ async function promptForDeploymentInfo() {
   console.log(`✅ Updated ${frontendConfigPath}.`);
 }
 
+async function setupPrivateDeployerKey(config) {
+  const wallet = Wallet.createRandom();
+  console.log('✅ Generated Ethereum Wallet:')
+  console.log(`   Public Key: ${wallet.publicKey}`);
+  console.log(`   Private Key: ${wallet.privateKey}`);
+
+  // console.log('Asking faucet for money...');
+  // await callFaucet(config.deploymentURL, config.apiKey, config.wallet.publicKey);
+
+}
+
 async function runConfig() {
+
+  let config = {};
 
   console.log("🚀 Copying configuration files...\n");
   await copyFiles();
 
   console.log('\n🔧 MultiBaas Configuration...\n');
   await promptForDeploymentInfo();
+
+  console.log('🔑 Generating Ethereum Deployer Key...\n');
+  await setupPrivateDeployerKey(config);
 
   rl.close();
 
