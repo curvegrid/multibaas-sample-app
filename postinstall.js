@@ -210,14 +210,14 @@ async function provisionApiKeys(config) {
   const web3KeyLabel = `web3key_${dateString}`;
 
   let web3Key = await createAPIKey(config.deploymentURL, config.adminApiKey, web3KeyLabel, WEB_3_GROUP_ID);
-  console.log('✅ Created Web3 API Key: ', web3Key);
+  console.log('✅ Created Web3 API Key:', web3Key);
 
   // Create DApp User API Key
   const DAPP_USER_GROUP_ID = 5;
   const dappUserKeyLabel = `dapp_user_key_${dateString}`;
 
   let dappUserKey = await createAPIKey(config.deploymentURL, config.adminApiKey, dappUserKeyLabel, DAPP_USER_GROUP_ID);
-  console.log('✅ Created Dapp User API Key: ', dappUserKey);
+  console.log('✅ Created Dapp User API Key:', dappUserKey);
 
   return { web3Key, dappUserKey };
 }
@@ -254,7 +254,7 @@ async function setupPrivateDeployerKey(config) {
   console.log(`   Address: ${wallet.address}`);
   console.log(`   Private Key: ${wallet.privateKey}`);
 
-  console.log('Asking faucet for money...');
+  console.log('   Asking faucet for money...');
   await callFaucet(config.deploymentURL, config.adminApiKey, wallet.address);
 
   return { wallet };
@@ -267,8 +267,9 @@ async function runConfig() {
   console.log("\nYou will need:\n");
   console.log("1. A MultiBaas deployment URL");
   console.log("2. A MultiBaas Admin API key for the deployment");
-  console.log("3. A Reown WalletKit project ID\n");
+  console.log("3. A Reown WalletKit project ID");
 
+  console.log("\nNOTE: You can re-run this configuration script any time with 'npm run postinstall'\n\n");
 
   console.log("🚀 Copying configuration files...\n");
   await copyFiles();
