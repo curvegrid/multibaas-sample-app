@@ -1,0 +1,28 @@
+{
+  "name": "multibaas-sample-app",
+  "version": "1.0.0",
+  "description": "MultiBaas Sample App is a simple voting demo for EVM blockchains",
+  "scripts": {
+	  "postinstall": "node postinstall.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/curvegrid/multibaas-sample-app.git"
+  },
+  "keywords": [
+    "Curvegrid",
+    "MultiBaas",
+    "Vote",
+    "Sample",
+    "EVM"
+  ],
+  "author": "Curvegrid Inc.",
+  "license": "MIT",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/curvegrid/multibaas-sample-app/issues"
+  },
+  "homepage": "https://github.com/curvegrid/multibaas-sample-app#readme",
+	"workspaces": ["blockchain", "frontend"]
+}
