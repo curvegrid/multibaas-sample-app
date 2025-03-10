@@ -81,10 +81,11 @@ async function createAPIKey(deploymentURL, apiKey, label, groupID) {
 
 }
 
-async function callFaucet(deploymentURL, apiKey, publicKey) {
-  const apiEndpoint = `${deploymentURL}/api/v0/faucet`;
+async function callFaucet(deploymentURL, apiKey, address) {
+  const apiEndpoint = `${deploymentURL}/api/v0/chains/ethereum/faucet`;
+
   const requestBody = {
-    address: publicKey
+    address: address
   };
 
   try {
@@ -135,32 +136,44 @@ async function promptForDeploymentInfo() {
   let reownProjectId = await askQuestion('Enter Reown WalletKit project ID: ');
   reownProjectId = reownProjectId.replace(/[\r\n\s]+/g, ''); // Remove newlines and spaces
 
+  console.log('');
+
+  return { deploymentURL, adminApiKey, reownProjectId };
+
+}
+
+async function provisionApiKeys(config) {
+  // Timestamp
   const date = new Date();
   const dateString = new Date().toISOString().replace(/[^\d]/g, '');
-
 
   // Create Web3 API Key
   const WEB_3_GROUP_ID = 6;
   const web3KeyLabel = `web3key_${dateString}`;
 
-  let web3Key = await createAPIKey(deploymentURL, adminApiKey, web3KeyLabel, WEB_3_GROUP_ID);
+  let web3Key = await createAPIKey(config.deploymentURL, config.adminApiKey, web3KeyLabel, WEB_3_GROUP_ID);
   console.log('✅ Created Web3 API Key: ', web3Key);
-
 
   // Create DApp User API Key
   const DAPP_USER_GROUP_ID = 5;
   const dappUserKeyLabel = `dapp_user_key_${dateString}`;
 
-  let dappUserKey = await createAPIKey(deploymentURL, adminApiKey, dappUserKeyLabel, DAPP_USER_GROUP_ID);
+  let dappUserKey = await createAPIKey(config.deploymentURL, config.adminApiKey, dappUserKeyLabel, DAPP_USER_GROUP_ID);
   console.log('✅ Created Dapp User API Key: ', dappUserKey);
 
+  return { web3Key, dappUserKey };
+}
+
+
+async function writeConfiguration(config) {
 
   // Update blockchain config file
   const blockchainConfigPath = configFiles[0].destination;
   let blockchainConfig = fs.readFileSync(blockchainConfigPath, 'utf8');
-  blockchainConfig = blockchainConfig.replace(/deploymentEndpoint:.*/, `deploymentEndpoint: '${deploymentURL}',`);
-  blockchainConfig = blockchainConfig.replace(/adminApiKey:.*/, `adminApiKey:\n    '${adminApiKey}',`);
-  blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${web3Key}',`);
+  blockchainConfig = blockchainConfig.replace(/deploymentEndpoint:.*/, `deploymentEndpoint: '${config.deploymentURL}',`);
+  blockchainConfig = blockchainConfig.replace(/adminApiKey:.*/, `adminApiKey:\n    '${config.adminApiKey}',`);
+  blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${config.web3Key}',`);
+  blockchainConfig = blockchainConfig.replace(/deployerPrivateKey:.*/, `deployerPrivateKey: '${config.wallet.privateKey}',`);
   fs.writeFileSync(blockchainConfigPath, blockchainConfig, 'utf8');
   console.log(`✅ Updated ${blockchainConfigPath}.`);
 
@@ -168,23 +181,25 @@ async function promptForDeploymentInfo() {
   // Update frontend config file
   const frontendConfigPath = configFiles[1].destination;
   let frontendConfig = fs.readFileSync(frontendConfigPath, 'utf8');
-  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL=.*/, `NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL='${deploymentURL}',`);
-  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY='${web3Key}',`);
-  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY='${dappUserKey}',`);
-  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID=.*/, `NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID='${reownProjectId}',`);
+  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL=.*/, `NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL='${config.deploymentURL}'`);
+  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY='${config.web3Key}'`);
+  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY='${config.dappUserKey}'`);
+  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID=.*/, `NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID='${config.reownProjectId}'`);
   fs.writeFileSync(frontendConfigPath, frontendConfig, 'utf8');
   console.log(`✅ Updated ${frontendConfigPath}.`);
+
 }
 
 async function setupPrivateDeployerKey(config) {
   const wallet = Wallet.createRandom();
   console.log('✅ Generated Ethereum Wallet:')
-  console.log(`   Public Key: ${wallet.publicKey}`);
+  console.log(`   Address: ${wallet.address}`);
   console.log(`   Private Key: ${wallet.privateKey}`);
 
-  // console.log('Asking faucet for money...');
-  // await callFaucet(config.deploymentURL, config.apiKey, config.wallet.publicKey);
+  console.log('Asking faucet for money...');
+  await callFaucet(config.deploymentURL, config.adminApiKey, wallet.address);
 
+  return { wallet };
 }
 
 async function runConfig() {
@@ -195,10 +210,14 @@ async function runConfig() {
   await copyFiles();
 
   console.log('\n🔧 MultiBaas Configuration...\n');
-  await promptForDeploymentInfo();
+  config = { ...config, ... await promptForDeploymentInfo() };
+  config = { ...config, ... await provisionApiKeys(config) };
+  config = { ...config, ... await setupPrivateDeployerKey(config) };
 
-  console.log('🔑 Generating Ethereum Deployer Key...\n');
-  await setupPrivateDeployerKey(config);
+  writeConfiguration(config);
+
+  console.log('\nConfiguration complete\n\n');
+  console.log('\nConfiguration complete\n\n');
 
   rl.close();
 
