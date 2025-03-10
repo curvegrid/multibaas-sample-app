@@ -45,6 +45,41 @@ async function copyFiles() {
   }
 }
 
+async function createAPIKey(deploymentURL, apiKey, label, groupID) {
+  const apiEndpoint = `${deploymentURL}/api/v0/api_keys`;
+  const requestBody = {
+    label: label,
+    groupIDs: [groupID]
+  };
+
+  try {
+
+    const request = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    };
+
+    const response = await fetch(apiEndpoint, request);
+
+    if (!response.ok) {
+      throw new Error(`❌ API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
+    }
+
+    const data = await response.json();
+    // console.log('data', data);
+    return data.result.key;
+  } catch (error) {
+    console.error(`❌ API Request Error: ${error.message}`);
+  }
+
+  return ''
+
+}
+
 async function promptForDeploymentInfo() {
   // Prompt for MultiBaas config only if files exists
   for (const { destination } of configFiles) {
@@ -57,10 +92,28 @@ async function promptForDeploymentInfo() {
   let deploymentURL = await askQuestion('Enter MultiBaas Deployment URL: ');
   let url = new URL(deploymentURL);
   deploymentURL = `${url.protocol}//${url.hostname}`; // Keep only protocol + domain
-  // deploymentURL = deploymentURL.replace(/\/+$/, ''); // Remove trailing slashes
 
   let adminApiKey = await askQuestion('Enter MultiBaas Admin API Key: ');
   adminApiKey = adminApiKey.replace(/[\r\n\s]+/g, ''); // Remove newlines and spaces
+
+  const date = new Date();
+  const dateString = new Date().toISOString().replace(/[^\d]/g, '');
+
+
+  // Create Web3 API Key
+  const WEB_3_GROUP_ID = 6;
+  const web3KeyLabel = `web3key_${dateString}`;
+
+  let web3Key = await createAPIKey(deploymentURL, adminApiKey, web3KeyLabel, WEB_3_GROUP_ID);
+  console.log('✅ Created Web3 API Key: ', web3Key);
+
+
+  // Create DApp User API Key
+  const DAPP_USER_GROUP_ID = 5;
+  const dappUserKeyLabel = `dapp_user_key_${dateString}`;
+
+  let dappUserKey = await createAPIKey(deploymentURL, adminApiKey, dappUserKeyLabel, DAPP_USER_GROUP_ID);
+  console.log('✅ Created Dapp User API Key: ', dappUserKey);
 
 
   // Update blockchain config file
@@ -68,13 +121,17 @@ async function promptForDeploymentInfo() {
   let blockchainConfig = fs.readFileSync(blockchainConfigPath, 'utf8');
   blockchainConfig = blockchainConfig.replace(/deploymentEndpoint:.*/, `deploymentEndpoint: '${deploymentURL}',`);
   blockchainConfig = blockchainConfig.replace(/adminApiKey:.*/, `adminApiKey:\n    '${adminApiKey}',`);
+  blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${web3Key}',`);
   fs.writeFileSync(blockchainConfigPath, blockchainConfig, 'utf8');
   console.log(`✅ Updated ${blockchainConfigPath}.`);
+
 
   // Update frontend config file
   const frontendConfigPath = configFiles[1].destination;
   let frontendConfig = fs.readFileSync(frontendConfigPath, 'utf8');
   frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL=.*/, `NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL='${deploymentURL}',`);
+  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY='${web3Key}',`);
+  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY='${dappUserKey}',`);
   fs.writeFileSync(frontendConfigPath, frontendConfig, 'utf8');
   console.log(`✅ Updated ${frontendConfigPath}.`);
 }
