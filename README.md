@@ -42,14 +42,11 @@ npm install
 
 If you have not yet deployed the `SimpleVoting.sol` smart contract to your MultiBaas deployment, we will now do so using the Hardhat project.
 
-Prepare the project for deployment:
-
 ```sh
 cd blockchain
-cp deployment-config.template.js deployment-config.development.js
 ```
 
-Now, you will need to fill in the fields of `deployment-config.development.js`.
+You will need to fill in the fields of `deployment-config.development.js`.
 - `deployerPrivateKey` should be set to the private key of your account with ETH on your target network, starting with `0x`. This key may be exported from MetaMask by clicking the `Account details` button in the menu of the account selector list, but please be sure only do this on a development-only account. It is strongly advised not to check it into source control.
 - `deploymentEndpoint` should be your MultiBaas Deployment URL, beginning with `https://` and ending with `.com`.
 - `ethChainID` should be `2017072401` for the Curvegrid Testnet.
@@ -69,14 +66,11 @@ Navigate to your MultiBaas deployment and confirm that you can see the contract 
 
 Now, we will setup the frontend application to interact with MultiBaas. This application uses [RainbowKit](https://www.rainbowkit.com/docs/installation) to support interaction with a variety of wallets.
 
-Start by setting up the project.
-
 ```sh
 cd frontend
-cp .env.template .env.development
 ```
 
-Now, you will need to fill in the fields of `.env.development`
+You will need to fill in the fields of `.env.development`
 - If you want to use WalletConnect, `NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID` should be set to the Project ID of a WalletKit project on [reown](https://cloud.reown.com/).
 - `NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL` should be set to your MultiBaas deployment URL, beginning with `https://` and ending with `.com`, same as before.
 - `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY` should be set to the API Key you previously created with label `nextjs_frontend`.
