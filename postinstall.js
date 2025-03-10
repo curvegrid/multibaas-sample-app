@@ -67,7 +67,7 @@ async function createAPIKey(deploymentURL, apiKey, label, groupID) {
     const response = await fetch(apiEndpoint, request);
 
     if (!response.ok) {
-      throw new Error(`❌ API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
+      throw new Error(`API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
     }
 
     const data = await response.json();
@@ -102,11 +102,69 @@ async function callFaucet(deploymentURL, apiKey, address) {
     const response = await fetch(apiEndpoint, request);
 
     if (!response.ok) {
-      throw new Error(`❌ API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
+      throw new Error(`API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
     }
 
     const data = await response.json();
-    console.log('data', data);
+    console.log('✅ Got money from faucet.');
+    return {}
+  } catch (error) {
+    console.error(`❌ API Request Error: ${error.message}`);
+  }
+
+  return {}
+}
+
+async function setupCORS(deploymentURL, apiKey) {
+  const apiEndpoint = `${deploymentURL}/api/v0/cors`;
+
+  // Check if the origin "http://localhost:3000" is already there
+  try {
+    const response = await fetch(apiEndpoint, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`❌ API request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    const corsOrigins = data.result.map(entry => entry.origin);
+    if (corsOrigins.includes("http://localhost:3000")) {
+      console.log(`✅ "http://localhost:3000" is already in the CORS list.`);
+      return {};
+    }
+  } catch (error) {
+    console.error(`❌ API Request Error: ${error.message}`);
+  }
+
+
+  // If no localhost:3000, add it
+  const requestBody = {
+    origin: 'http://localhost:3000'
+  };
+
+  try {
+    const request = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    };
+
+    const response = await fetch(apiEndpoint, request);
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
+    }
+
+    const data = await response.json();
+    console.log(`✅ "http://localhost:3000" added to CORS.`);
     return {}
   } catch (error) {
     console.error(`❌ API Request Error: ${error.message}`);
@@ -203,32 +261,47 @@ async function setupPrivateDeployerKey(config) {
 }
 
 async function runConfig() {
+  // Main script
 
-  let config = {};
+  console.log("\n#### Begin Post-Installation ####\n");
+  console.log("\nYou will need:\n");
+  console.log("1. A MultiBaas deployment URL");
+  console.log("2. A MultiBaas Admin API key for the deployment");
+  console.log("3. A Reown WalletKit project ID\n");
+
 
   console.log("🚀 Copying configuration files...\n");
   await copyFiles();
 
+
   console.log('\n🔧 MultiBaas Configuration...\n');
+  let config = {};
   config = { ...config, ... await promptForDeploymentInfo() };
   config = { ...config, ... await provisionApiKeys(config) };
   config = { ...config, ... await setupPrivateDeployerKey(config) };
+  await setupCORS(config.deploymentURL, config.adminApiKey);
 
   writeConfiguration(config);
 
-  console.log('\nConfiguration complete\n\n');
-  console.log('\nConfiguration complete\n\n');
+
+  console.log('\n#### Configuration complete 🦦 ####\n\n');
+
+
+  console.log('To deploy the voting contract:');
+
+  console.log('cd blockchain');
+  console.log('npm run deploy:voting:dev');
+
+
+  console.log('\nTo run the frontend server after deploying the contract:');
+
+  console.log('cd frontend');
+  console.log('npm run dev');
+
+  console.log();
 
   rl.close();
-
 }
 
-// Main script
-
-console.log("\n#### Begin Post-Installation ####\n");
-console.log("\nYou will need:\n");
-console.log("1. A MultiBaas deployment URL");
-console.log("2. A MultiBaas Admin API key for the deployment");
-console.log("3. A Reown WalletKit project ID\n");
 
 runConfig();
