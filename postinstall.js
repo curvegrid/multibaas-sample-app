@@ -81,7 +81,8 @@ async function createAPIKey(deploymentURL, apiKey, label, groupID) {
 }
 
 async function promptForDeploymentInfo() {
-  // Prompt for MultiBaas config only if files exists
+
+  // Prompt for config only if files exist
   for (const { destination } of configFiles) {
     if (!fs.existsSync(destination)) {
       console.log(`❌ Missing configuration file ${destination}`);
@@ -89,12 +90,16 @@ async function promptForDeploymentInfo() {
     }
   }
 
+  // Ask user for required information
   let deploymentURL = await askQuestion('Enter MultiBaas Deployment URL: ');
   let url = new URL(deploymentURL);
   deploymentURL = `${url.protocol}//${url.hostname}`; // Keep only protocol + domain
 
   let adminApiKey = await askQuestion('Enter MultiBaas Admin API Key: ');
   adminApiKey = adminApiKey.replace(/[\r\n\s]+/g, ''); // Remove newlines and spaces
+
+  let reownProjectId = await askQuestion('Enter Reown WalletKit project ID: ');
+  reownProjectId = reownProjectId.replace(/[\r\n\s]+/g, ''); // Remove newlines and spaces
 
   const date = new Date();
   const dateString = new Date().toISOString().replace(/[^\d]/g, '');
@@ -132,6 +137,7 @@ async function promptForDeploymentInfo() {
   frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL=.*/, `NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL='${deploymentURL}',`);
   frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY='${web3Key}',`);
   frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY='${dappUserKey}',`);
+  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID=.*/, `NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID='${reownProjectId}',`);
   fs.writeFileSync(frontendConfigPath, frontendConfig, 'utf8');
   console.log(`✅ Updated ${frontendConfigPath}.`);
 }
@@ -153,6 +159,7 @@ async function runConfig() {
 console.log("\n#### Begin Post-Installation ####\n");
 console.log("\nYou will need:\n");
 console.log("1. A MultiBaas deployment URL");
-console.log("2. A MultiBaas Admin API key for the deployment\n");
+console.log("2. A MultiBaas Admin API key for the deployment");
+console.log("3. A Reown WalletKit project ID\n");
 
 runConfig();
