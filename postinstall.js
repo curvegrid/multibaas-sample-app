@@ -24,9 +24,9 @@ async function askQuestion(query) {
   return new Promise((resolve) => rl.question(query, resolve));
 }
 
-async function promptOverwrite(destination) {
+async function prompt(question) {
   return new Promise((resolve) => {
-    rl.question(`⚠️  ${destination} already exists. Overwrite? (y/N): `, (answer) => {
+    rl.question(`${question} (y/N): `, (answer) => {
       resolve(answer.toLowerCase() === 'y');
     });
   });
@@ -35,7 +35,7 @@ async function promptOverwrite(destination) {
 async function copyFiles() {
   for (const { source, destination } of configFiles) {
     if (fs.existsSync(destination)) {
-      const overwrite = await promptOverwrite(destination);
+      const overwrite = await prompt(`⚠️  ${destination} already exists. Overwrite?`);
       if (!overwrite) {
         console.log(`❌ Skipped: ${destination}`);
         continue;
