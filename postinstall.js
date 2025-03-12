@@ -3,6 +3,8 @@ const readline = require('readline');
 const path = require('path');
 const { Wallet } = require('ethers');
 
+// Global vars /////////////////////////
+
 const configFiles = [
   {
     source: 'blockchain/deployment-config.template.js',
@@ -14,11 +16,13 @@ const configFiles = [
   },
 ];
 
-// Function to prompt user for overwrite confirmation
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
+
+
+// Functions ///////////////////////////
 
 async function askQuestion(query) {
   return new Promise((resolve) => rl.question(query, resolve));
@@ -71,7 +75,6 @@ async function createAPIKey(deploymentURL, apiKey, label, groupID) {
     }
 
     const data = await response.json();
-    // console.log('data', data);
     return data.result.key;
   } catch (error) {
     console.error(`❌ API Request Error: ${error.message}`);
@@ -175,7 +178,7 @@ async function setupCORS(deploymentURL, apiKey) {
 
 async function promptForDeploymentInfo() {
 
-  // Prompt for config only if files exist
+  // Abort if config files are missing
   for (const { destination } of configFiles) {
     if (!fs.existsSync(destination)) {
       console.log(`❌ Missing configuration file ${destination}`);
@@ -269,7 +272,13 @@ async function runConfig() {
   console.log("2. A MultiBaas Admin API key for the deployment");
   console.log("3. A Reown WalletKit project ID");
 
-  console.log("\nNOTE: You can re-run this configuration script any time with 'npm run postinstall'\n\n");
+  proceed = await prompt("\nNOTE: You can re-run this configuration script any time with 'npm run postinstall'\n\nContinue?");
+
+  if (!proceed) {
+    console.log('Skipping post-installation\n');
+    rl.close();
+    return;
+  }
 
   console.log("🚀 Copying configuration files...\n");
   await copyFiles();
@@ -304,5 +313,6 @@ async function runConfig() {
   rl.close();
 }
 
+// Main Script /////////////////////////
 
 runConfig();
