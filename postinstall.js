@@ -187,8 +187,19 @@ async function promptForDeploymentInfo() {
   }
 
   // Ask user for required information
-  let deploymentURL = await askQuestion('Enter MultiBaas Deployment URL: ');
-  let url = new URL(deploymentURL);
+  let deploymentURL = '';
+  let url = '';
+  for (;;) {
+    deploymentURL = await askQuestion('Enter MultiBaas Deployment URL: ');
+    try {
+      url = new URL(deploymentURL);
+    } catch (error) {
+      console.error(error.message);
+      console.log('URL should be of the format https://<DEPLOYMENT ID>.multibaas.com\n');
+      continue;
+    }
+    break;
+  }
   deploymentURL = `${url.protocol}//${url.hostname}`; // Keep only protocol + domain
 
   let adminApiKey = await askQuestion('Enter MultiBaas Admin API Key: ');
@@ -213,14 +224,21 @@ async function provisionApiKeys(config) {
   const web3KeyLabel = `web3key_${dateString}`;
 
   let web3Key = await createAPIKey(config.deploymentURL, config.adminApiKey, web3KeyLabel, WEB_3_GROUP_ID);
-  console.log('✅ Created Web3 API Key:', web3Key);
+  if (web3Key === '') {
+    console.error('Aborting configuration');
+    exit(1);
+  } else {
+    console.log('✅ Created Web3 API Key:', web3Key);
+  }
 
   // Create DApp User API Key
   const DAPP_USER_GROUP_ID = 5;
   const dappUserKeyLabel = `dapp_user_key_${dateString}`;
 
   let dappUserKey = await createAPIKey(config.deploymentURL, config.adminApiKey, dappUserKeyLabel, DAPP_USER_GROUP_ID);
-  console.log('✅ Created Dapp User API Key:', dappUserKey);
+  if (dappUserKey !== '') {
+    console.log('✅ Created Dapp User API Key:', dappUserKey);
+  }
 
   return { web3Key, dappUserKey };
 }
