@@ -25,8 +25,8 @@ const useMultiBaas = (): MultiBaasHook => {
   const mbApiKey = process.env.NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY || "";
   const votingContractLabel =
     process.env.NEXT_PUBLIC_MULTIBAAS_VOTING_CONTRACT_LABEL || "";
-  const votingAddressLabel =
-    process.env.NEXT_PUBLIC_MULTIBAAS_VOTING_ADDRESS_LABEL || "";
+  const votingAddressAlias =
+    process.env.NEXT_PUBLIC_MULTIBAAS_VOTING_ADDRESS_ALIAS || "";
 
   const chain = "ethereum";
 
@@ -65,7 +65,7 @@ const useMultiBaas = (): MultiBaasHook => {
 
       const response = await contractsApi.callContractFunction(
         chain,
-        votingAddressLabel,
+        votingAddressAlias,
         votingContractLabel,
         methodName,
         payload
@@ -79,7 +79,7 @@ const useMultiBaas = (): MultiBaasHook => {
         throw new Error(`Unexpected response type: ${response.data.result.kind}`);
       }
     },
-    [contractsApi, chain, votingAddressLabel, votingContractLabel, isConnected, address]
+    [contractsApi, chain, votingAddressAlias, votingContractLabel, isConnected, address]
   );
 
   const clearVote = useCallback(async (): Promise<SendTransactionParameters> => {
@@ -132,7 +132,7 @@ const useMultiBaas = (): MultiBaasHook => {
         undefined,
         false,
         chain,
-        votingAddressLabel,
+        votingAddressAlias,
         votingContractLabel,
         eventSignature,
         50
@@ -143,7 +143,7 @@ const useMultiBaas = (): MultiBaasHook => {
       console.error("Error getting voted events:", err);
       return null;
     }
-  }, [eventsApi, chain, votingAddressLabel, votingContractLabel]);
+  }, [eventsApi, chain, votingAddressAlias, votingContractLabel]);
 
   return {
     getChainStatus,

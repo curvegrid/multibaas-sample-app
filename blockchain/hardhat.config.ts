@@ -5,7 +5,6 @@ import path from 'path';
 
 let deployerPrivateKey = '0x0000000000000000000000000000000000000000000000000000000000000000';
 let deploymentEndpoint = '';
-let ethChainID = 1337;
 let adminApiKey = '';
 let web3Key = '';
 let rpcUrl = ''; // Required if web3Key is not provided
@@ -14,7 +13,7 @@ if (process.env['HARDHAT_NETWORK']) {
   const CONFIG_FILE = path.join(__dirname, `./deployment-config.${process.env['HARDHAT_NETWORK']}`);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   ({
-    deploymentConfig: { deploymentEndpoint, ethChainID, deployerPrivateKey, web3Key, adminApiKey, rpcUrl },
+    deploymentConfig: { deploymentEndpoint, deployerPrivateKey, web3Key, adminApiKey, rpcUrl },
     // eslint-disable-next-line @typescript-eslint/no-require-imports
   } = require(CONFIG_FILE));
 }
@@ -25,12 +24,10 @@ const config: HardhatUserConfig = {
   networks: {
     development: {
       url: web3Url,
-      chainId: ethChainID,
       accounts: [deployerPrivateKey],
     },
     testing: {
       url: web3Url,
-      chainId: ethChainID,
       accounts: [deployerPrivateKey],
     },
   },

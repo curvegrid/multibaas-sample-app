@@ -5,10 +5,6 @@ const deploymentConfig = {
   // Full URL such as https://abc123.multibaas.com
   deploymentEndpoint: 'https://<DEPLOYMENT ID>.multibaas.com',
 
-  // The chain ID of the blockchain network
-  // For example: Curvegrid test network = 2017072401, Ethereum Mainnet = 1, BSC Testnet = 97, BSC Mainnet = 56, Ethereum Sepolia = 11155111
-  ethChainID: 2017072401,
-
   // API key to access MultiBaas web3 endpoint
   // Note that the API key MUST be part of the "Web3" group
   // Create one on MultiBaas via navigation bar > Admin > API Keys

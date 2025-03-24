@@ -285,7 +285,6 @@ async function writeConfiguration(config) {
   blockchainConfig = blockchainConfig.replace(/adminApiKey:.*/, `adminApiKey:\n    '${config.adminApiKey}',`);
   blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${config.web3Key}',`);
   blockchainConfig = blockchainConfig.replace(/deployerPrivateKey:.*/, `deployerPrivateKey: '${config.wallet.privateKey}',`);
-  blockchainConfig = blockchainConfig.replace(/ethChainID:.*/, `ethChainID: '${config.chainID}',`);
   fs.writeFileSync(blockchainConfigPath, blockchainConfig, 'utf8');
   console.log(`✅ Updated ${blockchainConfigPath}.`);
 
