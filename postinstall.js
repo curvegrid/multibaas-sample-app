@@ -5,6 +5,8 @@ const { Wallet } = require('ethers');
 
 // Global vars /////////////////////////
 
+const CURVEGRID_PRIVATE_TESTNET_CHAIN_ID = 2017072401;
+
 const configFiles = [
   {
     source: 'blockchain/deployment-config.template.js',
@@ -48,6 +50,36 @@ async function copyFiles() {
     fs.copyFileSync(source, destination);
     console.log(`✅ Copied ${source} → ${destination}`);
   }
+}
+
+async function checkNetwork(config) {
+  const apiEndpoint = `${config.deploymentURL}/api/v0/chains/ethereum/status`;
+
+  try {
+    const request = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.adminApiKey}`
+      },
+    };
+
+    const response = await fetch(apiEndpoint, request);
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
+    }
+
+    const data = await response.json();
+    console.dir(data);
+    return { chainID: data.result.chainID };
+
+  } catch (error) {
+    console.error(`❌ API Request Error: ${error.message}`);
+  }
+
+  return {};
+
 }
 
 async function createAPIKey(deploymentURL, apiKey, label, groupID) {
@@ -253,6 +285,7 @@ async function writeConfiguration(config) {
   blockchainConfig = blockchainConfig.replace(/adminApiKey:.*/, `adminApiKey:\n    '${config.adminApiKey}',`);
   blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${config.web3Key}',`);
   blockchainConfig = blockchainConfig.replace(/deployerPrivateKey:.*/, `deployerPrivateKey: '${config.wallet.privateKey}',`);
+  blockchainConfig = blockchainConfig.replace(/ethChainID:.*/, `ethChainID: '${config.chainID}',`);
   fs.writeFileSync(blockchainConfigPath, blockchainConfig, 'utf8');
   console.log(`✅ Updated ${blockchainConfigPath}.`);
 
@@ -275,8 +308,12 @@ async function setupPrivateDeployerKey(config) {
   console.log(`   Address: ${wallet.address}`);
   console.log(`   Private Key: ${wallet.privateKey}`);
 
-  console.log('   Asking faucet for money...');
-  await callFaucet(config.deploymentURL, config.adminApiKey, wallet.address);
+  if (config.chainID === CURVEGRID_PRIVATE_TESTNET_CHAIN_ID) {
+    console.log('  Detected Curvegrid Private Testnet, asking faucet for money...');
+    await callFaucet(config.deploymentURL, config.adminApiKey, wallet.address);
+  } else {
+    console.log('💸 YOU WILL HAVE TO FUND THIS ACCOUNT TO USE IT AS A DEPLOYER.');
+  }
 
   return { wallet };
 }
@@ -301,11 +338,11 @@ async function runConfig() {
   console.log("🚀 Copying configuration files...\n");
   await copyFiles();
 
-
   console.log('\n🔧 MultiBaas Configuration...\n');
   let config = {};
   config = { ...config, ... await promptForDeploymentInfo() };
   config = { ...config, ... await provisionApiKeys(config) };
+  config = { ...config, ... await checkNetwork(config) };
   config = { ...config, ... await setupPrivateDeployerKey(config) };
   await setupCORS(config.deploymentURL, config.adminApiKey);
 
@@ -330,7 +367,5 @@ async function runConfig() {
 
   rl.close();
 }
-
-// Main Script /////////////////////////
 
 runConfig();
