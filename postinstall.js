@@ -7,6 +7,55 @@ const { Wallet } = require('ethers');
 
 const CURVEGRID_PRIVATE_TESTNET_CHAIN_ID = 2017072401;
 
+const CHAIN_ID_TO_RPC_URL = {
+  42161:     "https://arbitrum.drpc.org",                   // Arbitrum One
+  421614:    "https://arbitrum-sepolia.drpc.org",           // Arbitrum Sepolia
+
+  10242:     "https://rpc.arthera.net",                     // Arthera Mainnet
+  10243:     "https://rpc-test.arthera.net",                // Arthera Testnet
+
+  43114:     "https://avalanche.drpc.org",                  // Avalanche Mainnet
+  43113:     "https://avalanche-fuji.drpc.org",             // Avalanche Fuji
+
+  56:        "https://bsc.drpc.org",                        // BNB Mainnet
+  97:        "https://bsc-testnet.drpc.org",                // BNB Testnet
+
+  8453:      "https://base.drpc.org",                       // Base Mainnet
+  84532:     "https://base-sepolia.drpc.org",               // Base Sepolia
+
+  42220:     "https://celo.drpc.org",                       // Celo Mainnet
+  44787:     "https://celo-alfajores.drpc.org",             // Celo Alfajores
+
+  1:         "https://mainnet.drpc.org",                    // Ethereum Mainnet
+  11155111:  "https://sepolia.drpc.org",                    // Ethereum Sepolia
+  17000:     "https://holesky.drpc.org",                    // Ethereum Holesky
+
+  14:        "https://flare-api.flare.network/ext/C/rpc",   // Flare Mainnet
+  114:       "https://coston2-api.flare.network/ext/C/rpc", // Flare Coston2
+
+  100:       "https://gnosis.drpc.org",                     // Gnosis Mainnet
+
+  5000:      "https://mantle.drpc.org",                     // Mantle Mainnet
+  5003:      "https://mantle-sepolia.drpc.org",             // Mantle Sepolia
+
+  245022934: "https://neon-evm.drpc.org",                   // Neon EVM Mainnet
+  245022926: "https://neon-evm-devnet.drpc.org",            // Neon EVM Devnet
+
+  10:        "https://optimism.drpc.org",                   // Optimism Mainnet
+  11155420:  "https://optimism-sepolia.drpc.org",           // Optimism Sepolia
+
+  137:       "https://polygon.drpc.org",                    // Polygon Mainnet
+  80002:     "https://polygon-amoy.drpc.org",               // Polygon Amoy
+
+  534352:    "https://scroll.drpc.org",                     // Scroll Mainnet
+  534351:    "https://scroll-sepolia.drpc.org",             // Scroll Sepolia
+
+  1440002:   "https://rpc.xrplevm.org",                     // XRPL EVM Devnet
+
+  48900:     "https://zircuit-mainnet.drpc.org",            // Zircuit Mainnet
+  48899:     "https://zircuit-testnet.drpc.org",            // Zircuit Testnet
+};
+
 const configFiles = [
   {
     source: 'blockchain/deployment-config.template.js',
@@ -283,7 +332,12 @@ async function writeConfiguration(config) {
   let blockchainConfig = fs.readFileSync(blockchainConfigPath, 'utf8');
   blockchainConfig = blockchainConfig.replace(/deploymentEndpoint:.*/, `deploymentEndpoint: '${config.deploymentURL}',`);
   blockchainConfig = blockchainConfig.replace(/adminApiKey:.*/, `adminApiKey:\n    '${config.adminApiKey}',`);
-  blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${config.web3Key}',`);
+  if (config.chainID === CURVEGRID_PRIVATE_TESTNET_CHAIN_ID) {
+    blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${config.web3Key}',`);
+  } else {
+    blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `// web3Key:`);
+    blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: '${CHAIN_ID_TO_RPC_URL[config.chainID]}',`);
+  }
   blockchainConfig = blockchainConfig.replace(/deployerPrivateKey:.*/, `deployerPrivateKey: '${config.wallet.privateKey}',`);
   fs.writeFileSync(blockchainConfigPath, blockchainConfig, 'utf8');
   console.log(`✅ Updated ${blockchainConfigPath}.`);
