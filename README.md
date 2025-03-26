@@ -6,9 +6,11 @@ The purpose of this project is to demonstrate how to build a frontend-only decen
 
 ## Quickstart Guide
 
+You will need a few things to get started. Do this *before* running npm install.
+
 1. Go to [console.curvegrid.com](https://console.curvegrid.com), sign up, and create a MultiBaas deployment on your network of choice (use "Curvegrid Testnet" if unsure).
-2. Go to Admin > API Keys > New Key and create a key with label "sample_app_admin" and select "Administrators". Copy and save the API key and deployment URL.
-3. Go to [cloud.reown.com](http://cloud.reown.com/), sign up, create a new project with name "Sample App", select product "Wallet Kit" and platform "JavaScript". Copy and save the Project ID.
+2. Go to Admin > API Keys > New Key and create a key with label "sample_app_admin" and select "Administrators". Copy and save the **API key** and **deployment URL**.
+3. Go to [cloud.reown.com](http://cloud.reown.com/), sign up, create a new project with name "Sample App", select product "Wallet Kit" and platform "JavaScript". Copy and save the **Project ID**.
 
 Then run the installation and follow the steps as prompted:
 
