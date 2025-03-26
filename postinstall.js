@@ -215,7 +215,7 @@ async function checkNetwork(config) {
     }
 
     const data = await response.json();
-    console.dir(data);
+    // console.dir(data);
     return { chainID: data.result.chainID };
 
   } catch (error) {
@@ -454,7 +454,7 @@ async function writeConfiguration(config) {
 
 async function setupPrivateDeployerKey(config) {
   const wallet = Wallet.createRandom();
-  console.log('✅ Generated Ethereum Wallet:')
+  console.log('✅ Generated Ethereum Wallet (Feel free to replace with your own):')
   console.log(`   Address: ${wallet.address}`);
   console.log(`   Private Key: ${wallet.privateKey}`);
 
