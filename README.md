@@ -10,9 +10,9 @@ The purpose of this project is to demonstrate how to build a frontend-only decen
 2. Go to Admin > API Keys > New Key and create a key with label "sample_app_admin" and select "Administrators". Copy and save the API key and deployment URL.
 3. Go to [cloud.reown.com](http://cloud.reown.com/), sign up, create a new project with name "Sample App", select product "Wallet Kit" and platform "JavaScript". Copy and save the Project ID.
 
-Then run the installation:
+Then run the installation and follow the steps as prompted:
 
-```
+```sh
 git clone https://github.com/curvegrid/multibaas-sample-app.git
 cd multibaas-sample-app
 npm install
@@ -27,7 +27,7 @@ The repository consists of two sub-projects:
 
 ## MultiBaas Deployment Setup
 
-Using the [Curvegrid Console](https://console.curvegrid.com/), create a MultiBaas deployment on the Curvegrid Testnet. We recommend using this network for smart contract development due to its near-instant block finality and easily accessible faucet for account funding. It is also possible to use this demo app on another network, but it will require minor modification and alteration of setup procedure.
+Using the [Curvegrid Console](https://console.curvegrid.com/), create a MultiBaas deployment on the Curvegrid Testnet. We recommend using this network for smart contract development due to its near-instant block finality and easily accessible faucet for account funding. It is also possible to use this demo app on any of our other supported networks but you will need tokens to deploy and interact with the smart contract.
 
 ### Connecting to the Curvegrid Testnet
 
@@ -39,19 +39,28 @@ Via the top navbar, go to the `Blockchain > Faucet` page and request 1 ETH to yo
 
 ### Creating API Keys
 
-There are three API keys that **MUST** be created and used within this project.
+There are three API keys that **MUST** be created and used within this project. If you follow the installation script, you only need to provision an `Administrators` key and the others will be provisioned for you.
 
-1. Navigate to the `Admin > API Keys` page and create a new key with the label `hardhat_admin`, adding it to the `Administrators` group. This API key has admin permission over the MultiBaas deployment, so copy it somewhere safe.
+Otherwise, navigate to the `Admin > API Keys` page and create new keys with the following parameters:
 
-2. While on the same page, create another API key with the label `nextjs_frontend` and add it to the `DApp User` group. This API key only has permission to read existing data on the blockchain, such as the state variables of a smart contract deployment, and to request MultiBaas to format and return an unsigned transaction for a specific interaction.
+1. Label `sample_app_admin`, Group `Administrators`. This API key has admin permission over the MultiBaas deployment, so copy it somewhere safe.
 
-3. Finally, create another API key with the label `web3_proxy` and select the option to `Use this key as a public Web3 key`. This API key will be used to construct an RPC URL for interacting with the Curvegrid Testnet. The UI will automatically construct and display the URL in the form of `https://<DEPLOYMENT ID>.multibaas.com/web3/<API KEY IN WEB3 GROUP>`, but copy and save just the API key at the end.
+2. Label `nextjs_frontend`, Group `DApp User`. This API key only has permission to read existing data on the blockchain, such as the state variables of a smart contract deployment, and to request MultiBaas to format and return an unsigned transaction for a specific interaction.
+
+3. For Curvegrid Testnet Only: Label `web3_proxy`, Option: `Use this key as a public Web3 key`. This API key will be used to construct an RPC URL for interacting with the Curvegrid Testnet. The UI will automatically construct and display the URL in the form of `https://<DEPLOYMENT ID>.multibaas.com/web3/<API KEY IN WEB3 GROUP>`, but copy and save just the API key part at the end.
 
 Please make sure not to mix up these API keys.
 
-Now, navigate to the `Admin > CORS Origins` page and add `http://localhost:3000` to the list of allowed origins. By default, MultiBaas does not allow unknown remote clients to make API requests, so by adding the URL above, you are giving permission to your local Next.js app to query MultiBaas.
+### CORS
 
-## Install Dependencies
+For security reasons, your front end application needs permissions from the server to allow requests. If you follow the installation script, this will be done for you.
+
+Navigate to `Admin > CORS Origins` and add `http://localhost:3000` to the list of allowed origins. By default, MultiBaas does not allow unknown remote clients to make API requests, so by adding the URL above, you are giving permission to your local Next.js app to query MultiBaas. By default the frontend will run on port 3000, but if you are running another server it will increment to 3001 etc. so you may need to adjust your CORS settings accordingly.
+
+## Install dependencies
+
+You can run the installation and configure things manually by skipping the postinstall script. Otherwise, feel free to use the Quickstart Guide at the beginning of this document.
+
 ```sh
 npm install
 ```
@@ -64,13 +73,20 @@ If you have not yet deployed the `SimpleVoting.sol` smart contract to your Multi
 cd blockchain
 ```
 
-You will need to fill in the fields of `deployment-config.development.js`.
-- `deployerPrivateKey` should be set to the private key of your account with ETH on your target network, starting with `0x`. This key may be exported from MetaMask by clicking the `Account details` button in the menu of the account selector list, but please be sure only do this on a development-only account. It is strongly advised not to check it into source control.
-- `deploymentEndpoint` should be your MultiBaas Deployment URL, beginning with `https://` and ending with `.com`.
-- `ethChainID` should be `2017072401` for the Curvegrid Testnet.
-- `web3Key` should be set to the API Key you previously created with label `web3_proxy`. Be sure to only include the API key and not the rest of the URL.
-- `rpcUrl` is to be used instead of the `web3Key` for networks where MultiBaas does not support the web3 proxy feature. You should omit this field (leave it blank) if you are using the Curvegrid Testnet. If you are instead using another network, you may omit the `web3Key` and instead use an RPC URL from [ChainList](https://chainlist.org/).
-- `adminApiKey` should be set to the API Key you previously created with label `hardhat_admin`.
+The configuration is saved in `deployment-config.development.js`.
+
+If you did not run the installation, you can copy the template file to the configuration and fill in the fields manually:
+
+```sh
+cp deployment-config.template.js deployment-config.development.js
+```
+
+- `deployerPrivateKey`: The private key of your account with ETH on your target network, starting with `0x`. This key may be exported from MetaMask by clicking the `Account details` button in the menu of the account selector list, but please be sure only do this on a development-only account. It is strongly advised not to check it into source control.
+- `deploymentEndpoint`: Your MultiBaas Deployment URL, beginning with `https://` and ending with `.com`.
+- `ethChainID`: `2017072401` for Curvegrid Testnet otherwise find your chain ID on [chainlist.org](https://chainlist.org/).
+- `web3Key`: The Web3 Proxy API Key you previously created. Be sure to only include the API key and not the rest of the URL.
+- `rpcUrl`: The rpc URL to be used instead of the `web3Key` for networks other than Curvegrid Testnet. You should omit this field (leave it blank) if you are using the Curvegrid Testnet. If you are instead using another network, omit the `web3Key` and use an RPC URL from [ChainList](https://chainlist.org/).
+- `adminApiKey`: The API Key you previously created with label `sample_app_admin`.
 
 Finally, deploy the smart-contract:
 
@@ -88,12 +104,22 @@ Now, we will setup the frontend application to interact with MultiBaas. This app
 cd frontend
 ```
 
-You will need to fill in the fields of `.env.development`
-- If you want to use WalletConnect, `NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID` should be set to the Project ID of a WalletKit project on [reown](https://cloud.reown.com/).
-- `NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL` should be set to your MultiBaas deployment URL, beginning with `https://` and ending with `.com`, same as before.
-- `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY` should be set to the API Key you previously created with label `nextjs_frontend`.
-- `NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY` should be set to the API Key you previously created with label `web3_proxy`. This is required to connect RainbowKit to the custom Curvegrid Test Network.
-- `NEXT_PUBLIC_MULTIBAAS_VOTING_CONTRACT_LABEL` and `NEXT_PUBLIC_MULTIBAAS_VOTING_ADDRESS_LABEL` should match the `contractLabel` and `addressLabel` specified in `blockchain/scripts/deploy-mb.ts`. By default, these are both set to `simple_voting`.
+The configuration is saved in `.env.development`.
+
+If you did not run the installation, you can copy the template file to the configuration and fill in the fields manually:
+
+```sh
+cp .env.template .env.development
+```
+
+You will need to fill in the following fields:
+- `NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID`: Project ID of a WalletKit project on [reown](https://cloud.reown.com/).
+- `NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL`: Your MultiBaas deployment URL, beginning with `https://` and ending with `.com`.
+- `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY`: The Dapp User API Key.
+- `NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY` (For Curvegrid Testnet): The Web3 Proxy API Key.
+- `NEXT_PUBLIC_MULTIBAAS_VOTING_CONTRACT_LABEL`: 'simple_voting'
+- `NEXT_PUBLIC_MULTIBAAS_VOTING_ADDRESS_ALIAS`: 'simple_voting'
+- `NEXT_PUBLIC_MULTIBAAS_CHAIN_ID`: '2017072401' for Curvegrid Testnet otherwise the relevant [chain ID](https://chainlist.org/).
 
 Now, you should be able to run:
 
