@@ -7,54 +7,149 @@ const { Wallet } = require('ethers');
 
 const CURVEGRID_PRIVATE_TESTNET_CHAIN_ID = 2017072401;
 
-const CHAIN_ID_TO_RPC_URL = {
-  42161:     "https://arbitrum.drpc.org",                   // Arbitrum One
-  421614:    "https://arbitrum-sepolia.drpc.org",           // Arbitrum Sepolia
+// Ripped from wagmi/chains with a couple of manual additions
+const CHAIN_ID_TO_RPC = {
+  1: {
+    url: "https://eth.merkle.io",
+    name: "Ethereum"
+  },
+  10: {
+    url: "https://mainnet.optimism.io",
+    name: "OP Mainnet"
+  },
+  14: {
+    url: "https://flare-api.flare.network/ext/C/rpc",
+    name: "Flare Mainnet"
+  },
+  56: {
+    url: "https://rpc.ankr.com/bsc",
+    name: "BNB Smart Chain"
+  },
+  97: {
+    url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
+    name: "Binance Smart Chain Testnet"
+  },
+  100: {
+    url: "https://rpc.gnosischain.com",
+    name: "Gnosis"
+  },
+  114: {
+    url: "https://coston2-api.flare.network/ext/C/rpc",
+    name: "Flare Testnet Coston2"
+  },
+  137: {
+    url: "https://polygon-rpc.com",
+    name: "Polygon"
+  },
+  5000: {
+    url: "https://rpc.mantle.xyz",
+    name: "Mantle"
+  },
+  5001: {
+    url: "https://rpc.testnet.mantle.xyz",
+    name: "Mantle Testnet"
+  },
+  8453: {
+    url: "https://mainnet.base.org",
+    name: "Base"
+  },
+  10242: {
+    url: "https://rpc.arthera.net",
+    name: "Arthera"
+  },
+  10243: {
+    url: "https://rpc-test.arthera.net",
+    name: "Arthera Testnet"
+  },
+  17000: {
+    url: "https://ethereum-holesky-rpc.publicnode.com",
+    name: "Holesky"
+  },
+  42161: {
+    url: "https://arb1.arbitrum.io/rpc",
+    name: "Arbitrum One"
+  },
+  42220: {
+    url: "https://forno.celo.org",
+    name: "Celo"
+  },
+  43113: {
+    url: "https://api.avax-test.network/ext/bc/C/rpc",
+    name: "Avalanche Fuji"
+  },
+  43114: {
+    url: "https://api.avax.network/ext/bc/C/rpc",
+    name: "Avalanche"
+  },
+  44787: {
+    url: "https://alfajores-forno.celo-testnet.org",
+    name: "Alfajores"
+  },
+  48899: {
+    url: "https://zircuit1-testnet.p2pify.com",
+    name: "Zircuit Testnet"
+  },
+  48900: {
+    url: "https://zircuit1-mainnet.p2pify.com",
+    name: "Zircuit Mainnet"
+  },
+  80002: {
+    url: "https://rpc-amoy.polygon.technology",
+    name: "Polygon Amoy"
+  },
+  84532: {
+    url: "https://sepolia.base.org",
+    name: "Base Sepolia"
+  },
+  421614: {
+    url: "https://sepolia-rollup.arbitrum.io/rpc",
+    name: "Arbitrum Sepolia"
+  },
+  534351: {
+    url: "https://sepolia-rpc.scroll.io",
+    name: "Scroll Sepolia"
+  },
+  534352: {
+    url: "https://rpc.scroll.io",
+    name: "Scroll"
+  },
+  1440002: {
+    url: "https://rpc.xrplevm.org",
+    name: "XRPL EVM Devnet"
+  },
+  11155111: {
+    url: "https://sepolia.drpc.org",
+    name: "Sepolia"
+  },
+  11155420: {
+    url: "https://sepolia.optimism.io",
+    name: "OP Sepolia"
+  },
+  245022926: {
+    url: "https://devnet.neonevm.org",
+    name: "Neon EVM DevNet"
+  },
+  245022934: {
+    url: "https://neon-proxy-mainnet.solana.p2p.org",
+    name: "Neon EVM MainNet"
+  },
 
-  10242:     "https://rpc.arthera.net",                     // Arthera Mainnet
-  10243:     "https://rpc-test.arthera.net",                // Arthera Testnet
+  // Manual additions
+  10242: {
+    url: "https://rpc.arthera.net",
+    name: 'Arthera',
+  },
+  10243: {
+    url: "https://rpc-test.arthera.net",
+    name: "Arthera Testnet",
+ },
+  1440002: {
+    url: "https://rpc.xrplevm.org",
+    name: "XRPL EVM Devnet",
+ }
 
-  43114:     "https://avalanche.drpc.org",                  // Avalanche Mainnet
-  43113:     "https://avalanche-fuji.drpc.org",             // Avalanche Fuji
+}
 
-  56:        "https://bsc.drpc.org",                        // BNB Mainnet
-  97:        "https://bsc-testnet.drpc.org",                // BNB Testnet
-
-  8453:      "https://base.drpc.org",                       // Base Mainnet
-  84532:     "https://base-sepolia.drpc.org",               // Base Sepolia
-
-  42220:     "https://celo.drpc.org",                       // Celo Mainnet
-  44787:     "https://celo-alfajores.drpc.org",             // Celo Alfajores
-
-  1:         "https://mainnet.drpc.org",                    // Ethereum Mainnet
-  11155111:  "https://sepolia.drpc.org",                    // Ethereum Sepolia
-  17000:     "https://holesky.drpc.org",                    // Ethereum Holesky
-
-  14:        "https://flare-api.flare.network/ext/C/rpc",   // Flare Mainnet
-  114:       "https://coston2-api.flare.network/ext/C/rpc", // Flare Coston2
-
-  100:       "https://gnosis.drpc.org",                     // Gnosis Mainnet
-
-  5000:      "https://mantle.drpc.org",                     // Mantle Mainnet
-  5003:      "https://mantle-sepolia.drpc.org",             // Mantle Sepolia
-
-  245022934: "https://neon-evm.drpc.org",                   // Neon EVM Mainnet
-  245022926: "https://neon-evm-devnet.drpc.org",            // Neon EVM Devnet
-
-  10:        "https://optimism.drpc.org",                   // Optimism Mainnet
-  11155420:  "https://optimism-sepolia.drpc.org",           // Optimism Sepolia
-
-  137:       "https://polygon.drpc.org",                    // Polygon Mainnet
-  80002:     "https://polygon-amoy.drpc.org",               // Polygon Amoy
-
-  534352:    "https://scroll.drpc.org",                     // Scroll Mainnet
-  534351:    "https://scroll-sepolia.drpc.org",             // Scroll Sepolia
-
-  1440002:   "https://rpc.xrplevm.org",                     // XRPL EVM Devnet
-
-  48900:     "https://zircuit-mainnet.drpc.org",            // Zircuit Mainnet
-  48899:     "https://zircuit-testnet.drpc.org",            // Zircuit Testnet
-};
 
 const configFiles = [
   {
@@ -159,6 +254,7 @@ async function createAPIKey(deploymentURL, apiKey, label, groupID) {
     return data.result.key;
   } catch (error) {
     console.error(`❌ API Request Error: ${error.message}`);
+    console.error(error.stack);
   }
 
   return ''
@@ -307,7 +403,7 @@ async function provisionApiKeys(config) {
   let web3Key = await createAPIKey(config.deploymentURL, config.adminApiKey, web3KeyLabel, WEB_3_GROUP_ID);
   if (web3Key === '') {
     console.error('Aborting configuration');
-    exit(1);
+    process.exit(1);
   } else {
     console.log('✅ Created Web3 API Key:', web3Key);
   }
@@ -336,7 +432,7 @@ async function writeConfiguration(config) {
     blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${config.web3Key}',`);
   } else {
     blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `// web3Key:`);
-    blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: '${CHAIN_ID_TO_RPC_URL[config.chainID]}',`);
+    blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: '${CHAIN_ID_TO_RPC[config.chainID].url}',`);
   }
   blockchainConfig = blockchainConfig.replace(/deployerPrivateKey:.*/, `deployerPrivateKey: '${config.wallet.privateKey}',`);
   fs.writeFileSync(blockchainConfigPath, blockchainConfig, 'utf8');
@@ -350,6 +446,7 @@ async function writeConfiguration(config) {
   frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY='${config.web3Key}'`);
   frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY=.*/, `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY='${config.dappUserKey}'`);
   frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID=.*/, `NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID='${config.reownProjectId}'`);
+  frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_CHAIN_ID=.*/, `NEXT_PUBLIC_MULTIBAAS_CHAIN_ID='${config.chainID}'`);
   fs.writeFileSync(frontendConfigPath, frontendConfig, 'utf8');
   console.log(`✅ Updated ${frontendConfigPath}.`);
 
