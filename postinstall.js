@@ -343,7 +343,7 @@ async function setupCORS(deploymentURL, apiKey) {
       throw new Error(`API request failed with status ${response.status} - ${response.statusText} - \nFull request:\n${JSON.stringify(request)}\nFull response:\n${JSON.stringify(response)}`);
     }
 
-    const data = await response.json();
+    await response.json();
     console.log(`✅ "http://localhost:3000" added to CORS.`);
     return {}
   } catch (error) {
