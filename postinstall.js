@@ -412,7 +412,7 @@ async function provisionApiKeys(config) {
   const DAPP_USER_GROUP_ID = 5;
   const dappUserKeyLabel = `dapp_user_key_${dateString}`;
 
-  let dappUserKey = await createAPIKey(config.deploymentURL, config.adminApiKey, dappUserKeyLabel, DAPP_USER_GROUP_ID);
+  const dappUserKey = await createAPIKey(config.deploymentURL, config.adminApiKey, dappUserKeyLabel, DAPP_USER_GROUP_ID);
   if (dappUserKey !== '') {
     console.log('✅ Created Dapp User API Key:', dappUserKey);
   }
