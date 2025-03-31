@@ -400,7 +400,7 @@ async function provisionApiKeys(config) {
   const WEB_3_GROUP_ID = 6;
   const web3KeyLabel = `web3key_${dateString}`;
 
-  let web3Key = await createAPIKey(config.deploymentURL, config.adminApiKey, web3KeyLabel, WEB_3_GROUP_ID);
+  const web3Key = await createAPIKey(config.deploymentURL, config.adminApiKey, web3KeyLabel, WEB_3_GROUP_ID);
   if (web3Key === '') {
     console.error('Aborting configuration');
     process.exit(1);
