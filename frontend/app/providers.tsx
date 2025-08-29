@@ -17,6 +17,7 @@ import {
    mainnet, sepolia, holesky,
    flare, flareTestnet,
    gnosis,
+   lisk, liskSepolia,
    mantle, mantleTestnet,
    neonMainnet, neonDevnet,
    optimism, optimismSepolia,
@@ -34,32 +35,25 @@ const mbBaseUrl = process.env.NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL || '';
 const mbWeb3ApiKey = process.env.NEXT_PUBLIC_MULTIBAAS_WEB3_API_KEY || '';
 
 // Add chains not supported by wagmi/chains
-const arthera = {
-  id: 10242,
-  name: 'Arthera',
-  nativeCurrency: { name: 'Arthera', symbol: 'AA', decimals: 18 },
-  rpcUrls: {
-    default: { http: [`https://rpc.arthera.net`] },
-  },
-} as const satisfies Chain;
 
-const artheraTestnet = {
-  id: 10243,
-  name: 'Arthera Testnet',
-  nativeCurrency: { name: 'Arthera', symbol: 'AA', decimals: 18 },
-  rpcUrls: {
-    default: { http: [`https://rpc-test.arthera.net`] },
-  },
-} as const satisfies Chain;
-
-const xrplEvmDevnet = {
-  id: 1440002,
-  name: 'XRPL EVM Devnet',
+const xrplEvmMainnet = {
+  id: 1440000,
+  name: 'XRPL EVM Mainnet',
   nativeCurrency: { name: 'Ripple', symbol: 'XRPL', decimals: 18 },
   rpcUrls: {
     default: { http: [`https://rpc.xrplevm.org`] },
   },
 } as const satisfies Chain;
+
+const xrplEvmTestnet = {
+  id: 1449000,
+  name: 'XRPL EVM Testnet',
+  nativeCurrency: { name: 'Ripple', symbol: 'XRPL', decimals: 18 },
+  rpcUrls: {
+    default: { http: [`https://rpc.testnet.xrplevm.org`] },
+  },
+} as const satisfies Chain;
+
 
 const curvegridTestnet = {
   id: 2017072401,
@@ -73,7 +67,6 @@ const curvegridTestnet = {
 // Combine wagmi chains with custom configurations
 const chainList = [
    arbitrum, arbitrumSepolia,
-   arthera, artheraTestnet, // Manual addition
    avalanche, avalancheFuji,
    base, baseSepolia,
    bsc, bscTestnet,
@@ -81,13 +74,14 @@ const chainList = [
    curvegridTestnet,        // Manual addition
    flare, flareTestnet,
    gnosis,
+   lisk, liskSepolia,
    mainnet, sepolia, holesky,
    mantle, mantleTestnet,
    neonMainnet, neonDevnet,
    optimism, optimismSepolia,
    polygon, polygonAmoy,
    scroll, scrollSepolia,
-   xrplEvmDevnet,           // Manual addition
+   xrplEvmMainnet, xrplEvmTestnet, // Manual addition
    zircuit, zircuitTestnet
 ];
 

@@ -52,14 +52,6 @@ const CHAIN_ID_TO_RPC = {
     url: "https://mainnet.base.org",
     name: "Base"
   },
-  10242: {
-    url: "https://rpc.arthera.net",
-    name: "Arthera"
-  },
-  10243: {
-    url: "https://rpc-test.arthera.net",
-    name: "Arthera Testnet"
-  },
   17000: {
     url: "https://ethereum-holesky-rpc.publicnode.com",
     name: "Holesky"
@@ -112,10 +104,6 @@ const CHAIN_ID_TO_RPC = {
     url: "https://rpc.scroll.io",
     name: "Scroll"
   },
-  1440002: {
-    url: "https://rpc.xrplevm.org",
-    name: "XRPL EVM Devnet"
-  },
   11155111: {
     url: "https://sepolia.drpc.org",
     name: "Sepolia"
@@ -134,18 +122,22 @@ const CHAIN_ID_TO_RPC = {
   },
 
   // Manual additions
-  10242: {
-    url: "https://rpc.arthera.net",
-    name: 'Arthera',
-  },
-  10243: {
-    url: "https://rpc-test.arthera.net",
-    name: "Arthera Testnet",
- },
-  1440002: {
+  1440000: {
     url: "https://rpc.xrplevm.org",
-    name: "XRPL EVM Devnet",
- }
+    name: "XRPL EVM Mainnet"
+  },
+  1449000: {
+    url: "https://rpc.testnet.xrplevm.org",
+    name: "XRPL EVM Testnet"
+  },
+  1135: {
+    url: "https://rpc.api.lisk.com",
+    name: "Lisk"
+  },
+  4202: {
+    url: "https://rpc.sepolia-api.lisk.com",
+    name: "Lisk Sepolia"
+  }
 
 }
 
