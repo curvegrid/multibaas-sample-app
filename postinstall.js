@@ -423,7 +423,13 @@ async function writeConfiguration(config) {
     blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${config.web3Key}',`);
   } else {
     blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `// web3Key:`);
-    blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: '${CHAIN_ID_TO_RPC[config.chainID].url}',`);
+    const chainInfo = CHAIN_ID_TO_RPC[config.chainID];
+    if (!chainInfo) {
+      console.warn(`⚠️  Warning: Chain ID ${config.chainID} not found in supported RPC list. You need to manually configure the RPC URL in blockchain/deployment-config.development.js`);
+      blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: 'YOUR_RPC_URL_HERE', // Chain ID ${config.chainID} does not support automatic configuration`);
+    } else {
+      blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: '${chainInfo.url}',`);
+    }
   }
   blockchainConfig = blockchainConfig.replace(/deployerPrivateKey:.*/, `deployerPrivateKey: '${config.wallet.privateKey}',`);
   fs.writeFileSync(blockchainConfigPath, blockchainConfig, 'utf8');
@@ -440,6 +446,14 @@ async function writeConfiguration(config) {
   frontendConfig = frontendConfig.replace(/NEXT_PUBLIC_MULTIBAAS_CHAIN_ID=.*/, `NEXT_PUBLIC_MULTIBAAS_CHAIN_ID='${config.chainID}'`);
   fs.writeFileSync(frontendConfigPath, frontendConfig, 'utf8');
   console.log(`✅ Updated ${frontendConfigPath}.`);
+
+  // Check if chain ID needs manual configuration
+  const chainInfo = CHAIN_ID_TO_RPC[config.chainID];
+  if (!chainInfo && config.chainID !== CURVEGRID_PRIVATE_TESTNET_CHAIN_ID) {
+    console.warn(`⚠️  Chain ID ${config.chainID} is not automatically supported.`);
+    console.warn(`   Please add a custom chain configuration to frontend/app/providers.tsx`);
+    console.warn(`   Follow the template in providers.tsx for guidance.`);
+  }
 
 }
 
