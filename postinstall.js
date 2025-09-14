@@ -423,7 +423,13 @@ async function writeConfiguration(config) {
     blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `web3Key:\n    '${config.web3Key}',`);
   } else {
     blockchainConfig = blockchainConfig.replace(/web3Key:.*/, `// web3Key:`);
-    blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: '${CHAIN_ID_TO_RPC[config.chainID].url}',`);
+    const chainInfo = CHAIN_ID_TO_RPC[config.chainID];
+    if (!chainInfo) {
+      console.warn(`⚠️  Warning: Chain ID ${config.chainID} not found in supported RPC list. You need to manually configure the RPC URL in blockchain/deployment-config.development.js`);
+      blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: 'YOUR_RPC_URL_HERE', // Chain ID ${config.chainID} does not support automatic configuration`);
+    } else {
+      blockchainConfig = blockchainConfig.replace(/rpcUrl:.*/, `rpcUrl: '${chainInfo.url}',`);
+    }
   }
   blockchainConfig = blockchainConfig.replace(/deployerPrivateKey:.*/, `deployerPrivateKey: '${config.wallet.privateKey}',`);
   fs.writeFileSync(blockchainConfigPath, blockchainConfig, 'utf8');
