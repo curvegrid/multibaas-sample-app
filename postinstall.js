@@ -447,6 +447,14 @@ async function writeConfiguration(config) {
   fs.writeFileSync(frontendConfigPath, frontendConfig, 'utf8');
   console.log(`✅ Updated ${frontendConfigPath}.`);
 
+  // Check if chain ID needs manual configuration
+  const chainInfo = CHAIN_ID_TO_RPC[config.chainID];
+  if (!chainInfo && config.chainID !== CURVEGRID_PRIVATE_TESTNET_CHAIN_ID) {
+    console.warn(`⚠️  Chain ID ${config.chainID} is not automatically supported.`);
+    console.warn(`   Please add a custom chain configuration to frontend/app/providers.tsx`);
+    console.warn(`   Follow the template in providers.tsx for guidance.`);
+  }
+
 }
 
 async function setupPrivateDeployerKey(config) {

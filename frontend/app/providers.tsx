@@ -64,6 +64,23 @@ const curvegridTestnet = {
   },
 } as const satisfies Chain;
 
+/*
+  CUSTOM CHAIN TEMPLATE:
+  If you need to add support for a chain not in the chainList above,
+  uncomment and modify this template:
+
+const customChain = {
+  id: YOUR_CHAIN_ID,
+  name: 'Your Chain Name',
+  nativeCurrency: { name: 'Token Name', symbol: 'SYMBOL', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://your-rpc-url-here'] },
+  },
+} as const satisfies Chain;
+
+Then add customChain to the chainList array below.
+*/
+
 // Combine wagmi chains with custom configurations
 const chainList = [
    arbitrum, arbitrumSepolia,
@@ -107,3 +124,4 @@ export function Providers({ children }: { children: React.ReactNode }) {
     </WagmiProvider>
   );
 }
+
