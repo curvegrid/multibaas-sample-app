@@ -11,8 +11,13 @@
     "fix:sol": "npm run fix:prettier && npm run fix:solhint",
     "fix:all": "npm run fix:eslint && npm run fix:sol",
     "test": "npx hardhat test",
-    "deploy:voting:dev": "HARDHAT_NETWORK=development npx hardhat run scripts/deploy-mb.ts",
-    "deploy:voting:testing": "HARDHAT_NETWORK=testing npx hardhat run scripts/deploy-mb.ts"
+    "deploy:marketplace:base-sepolia": "HARDHAT_NETWORK=base-sepolia npx hardhat run scripts/deploy-marketplace-v2.ts",
+    "deploy:marketplace:base-sepolia:with-products": "ADD_SAMPLE_PRODUCTS=true HARDHAT_NETWORK=base-sepolia npx hardhat run scripts/deploy-marketplace-v2.ts",
+    "admin:add": "HARDHAT_NETWORK=base-sepolia npx hardhat run scripts/add-admin.ts",
+    "admin:remove": "HARDHAT_NETWORK=base-sepolia npx hardhat run scripts/remove-admin.ts",
+    "admin:check": "HARDHAT_NETWORK=base-sepolia npx hardhat run scripts/check-admin.ts",
+    "cleanup:addresses": "HARDHAT_NETWORK=base-sepolia npx hardhat run scripts/cleanup-addresses.ts",
+    "generate:wallet": "npx ts-node scripts/generate-wallet.ts"
   },
   "repository": {
     "type": "git",

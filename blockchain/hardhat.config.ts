@@ -30,12 +30,17 @@ const config: HardhatUserConfig = {
       url: web3Url,
       accounts: [deployerPrivateKey],
     },
+    'base-sepolia': {
+      url: web3Url,
+      accounts: [deployerPrivateKey],
+      chainId: 84532,
+    },
   },
   mbConfig: {
     apiKey: adminApiKey,
     host: deploymentEndpoint,
-    allowUpdateAddress: ['development', 'testing'],
-    allowUpdateContract: ['development'],
+    allowUpdateAddress: ['development', 'testing', 'base-sepolia'],
+    allowUpdateContract: ['development', 'base-sepolia'],
   },
   solidity: {
     compilers: [

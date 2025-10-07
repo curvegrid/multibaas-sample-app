@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import { Providers } from "./providers";
 import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
-import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Simple Voting DApp - Powered by MultiBaas",
+  title: "Simple E-Commerce DApp - Powered by MultiBaas",
   description: "Frontend-only DApp to interact with a voting contract on Ethereum",
 };
 
