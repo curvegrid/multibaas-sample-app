@@ -12,7 +12,10 @@
     "fix:all": "npm run fix:eslint && npm run fix:sol",
     "test": "npx hardhat test",
     "deploy:voting:dev": "HARDHAT_NETWORK=development npx hardhat run scripts/deploy-mb.ts",
-    "deploy:voting:testing": "HARDHAT_NETWORK=testing npx hardhat run scripts/deploy-mb.ts"
+    "deploy:voting:testing": "HARDHAT_NETWORK=testing npx hardhat run scripts/deploy-mb.ts",
+    "deploy:token:dev": "HARDHAT_NETWORK=development npx hardhat run scripts/deploy-trex.ts",
+    "deploy:token:testing": "HARDHAT_NETWORK=testing npx hardhat run scripts/deploy-trex.ts",
+    "calc-claim-id": "node scripts/calc-claim-id.js"
   },
   "repository": {
     "type": "git",
@@ -43,5 +46,11 @@
     "prettier-plugin-solidity": "^1.4.2",
     "solhint": "^5.0.4",
     "typescript-eslint": "^8.20.0"
+  },
+  "dependencies": {
+    "@onchain-id/solidity": "^2.2.1",
+    "@openzeppelin/contracts": "^4.9.6",
+    "@openzeppelin/contracts-upgradeable": "^4.9.6",
+    "@openzeppelin/hardhat-upgrades": "^3.9.1"
   }
 }

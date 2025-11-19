@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from 'hardhat/config';
 import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-multibaas-plugin';
+import '@openzeppelin/hardhat-upgrades';
 import path from 'path';
 
 let deployerPrivateKey = '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -37,6 +38,11 @@ const config: HardhatUserConfig = {
     allowUpdateAddress: ['development', 'testing'],
     allowUpdateContract: ['development'],
   },
+  paths: {
+    sources: './contracts',
+    cache: './cache',
+    artifacts: './artifacts',
+  },
   solidity: {
     compilers: [
       {
@@ -47,6 +53,15 @@ const config: HardhatUserConfig = {
             runs: 99999,
           },
           evmVersion: 'paris', // until PUSH0 opcode is widely supported
+        },
+      },
+      {
+        version: '0.8.17', // T-REX contracts version
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
         },
       },
     ],
